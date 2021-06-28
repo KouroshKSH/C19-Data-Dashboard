@@ -1,0 +1,339 @@
+<!-- DOCTYPE html -->
+<html lang="en" dir="ltr">
+
+<!-- getting bar charts from the website -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+
+<!-- getting the map from the website -->
+<script src="https://code.highcharts.com/maps/highmaps.js"></script>
+<script src="https://code.highcharts.com/maps/modules/data.js"></script>
+<script src="https://code.highcharts.com/maps/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/maps/modules/offline-exporting.js"></script>
+<script src="https://code.highcharts.com/mapdata/custom/world.js"></script>
+<link rel="stylesheet" type="text/css" href="//github.com/downloads/lafeber/world-flags-sprite/flags32.css" />
+
+<head>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:thin,extra-light,light,100,200,300,400,500,600,700,800" rel="stylesheet">
+    <meta charset="utf-8">
+    <title>Covid stats</title>
+    <style>
+        *{
+            box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            -webkit-box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        html{
+            width: 100%;
+        }
+        body{
+            width: 100%;
+           padding-top: 120px;
+           padding-bottom: 40px;
+        }
+        .fixed-header, .fixed-footer{
+           width: 100%;
+           position: fixed;
+           background: #001f5e;
+           padding: 0px 0;
+           color: #fff;
+           font-weight: normal;
+           font-size: large;
+           font-family: Montserrat;
+           z-index: 2;
+        }
+        .fixed-header{
+           top: 0;
+        }
+        .fixed-footer{
+           bottom: 0;
+        }
+        .container{
+           width: 75%;
+           margin: 0 auto;
+        }
+        nav a{
+           color: #fff;
+           text-decoration: none;
+           padding: 20px 50px;
+           display: inline-block;
+        }
+         input[type = submit] {
+            width: 175px;
+            -webkit-border-radius: 5px;
+            -moz-border-radius: 5px;
+            border-radius: 5px;
+            background-color: #0c48b7;
+            border: none;
+            text-decoration: none;
+            color: white;
+            font-family: Montserrat;
+            font-weight: bold;
+            padding: 21px 21px;
+            margin: 1px 1px;
+            cursor: pointer;
+         }
+         nav{
+             height: 120px;
+             overflow: hidden;
+         }
+         #a1{
+            float: left;
+            width: auto;
+            height: 100%;
+         }
+         #a2{
+             margin: auto auto;
+            height: 100%;
+            float: right;
+            width: auto;
+            text-align: center;
+            padding-top: 50px;
+         }
+         #a2 h1{
+             text-decoration: underline;
+             color: #dee8fc;
+         }
+      </style>
+
+</head>
+<body>
+    <div class="fixed-header">
+        <div>
+            <nav>
+                <a href="/" id="a1"><span style="font-size: 55px;"><strong>Covid-19</strong> <small>Statistics</small></a>
+                <a href="https://youtu.be/dQw4w9WgXcQ" id="a2" target="_blank">
+                    <h1>click here to visit WHO.org</h1>
+                </a>
+            </nav>
+        </div>
+    </div>
+    <br>
+    <div>
+        <!-- first div -->
+        <div class="col-lg-6" style="float: left;">
+            <br>
+            <br>
+            <br>
+            {% if show_map_cond == 'True' %}
+                <!-- world map will be shown if true -->
+                <div id="mapChart" style="width: 1190px; height: 750px; padding-left: 20px;"></div>
+            {% elif show_map_cond == 'False' %}
+                <br>
+                <h2 style="text-align: center; font-family: Montserrat;">
+                    data analysis for
+                </h2>
+                <h1 style="text-align: center; font-family: Montserrat; font-weight: bold; color: #0c48b7">
+                    - {{country_name}} -
+                </h1>
+                <br>
+                <canvas id="lineChart" style="height: 630px;"></canvas>
+                <br>
+            {% endif %}
+        </div>
+
+        <!-- second div -->
+        <div class="col-lg-3" style="float: right; max-height: 900px;max-width:600px;overflow: scroll; overflow-x:hidden;">
+            <br>
+            <h2 style="text-align: left; font-family: Montserrat, sans-serif; font-weight: normal;">
+                Total number of <b>infected</b> people:
+            </h2>
+            <h1 style="text-align: left; font-family: Montserrat, sans-serif; font-weight: bold; color: #0c48b7;">
+                > {{total_count}}
+            </h1>
+            <br>
+            <h2 style="text-align: left; font-family: Montserrat, sans-serif; font-weight: normal;">
+                Total number of <b>deceased</b> people:
+            </h2>
+            <h1 style="text-align: left; font-family: Montserrat, sans-serif; font-weight: bold; color: #0c48b7;">
+                > {{death_total_counts}}
+            </h1>
+            <br>
+            <div class="col-lg-12" style="float: left;">
+                <div class="col-lg-4" style="float: left;">
+                    <form action="select_each_country" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {% for country in countries_names %}
+                            <input type="submit" name="country_name_loop" value="{{country}}">
+                            <br>
+                        {% endfor %}
+                    </form>
+                </div>
+            </div>
+            <div class="col-lg-8" style="float: left;">
+                <!-- getting the graph into our UI -->
+                <canvas id="myChart" style="width: 400px; height: 12200px;"></canvas>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script>
+    //these are for bar charts
+    var ctx = document.getElementById('myChart').getContext('2d');
+    var chartOptions = {
+   legend:
+   {
+       display: false
+   },
+   scales:
+   {
+       xAxes:
+       [
+       {barPercentage:1}
+       ],
+
+       yAxes:
+       [
+               {ticks: {display:false}},
+               {display: false},
+        ],
+
+       elements:
+       {
+           rectangle: {borderSkipped: 'left',}
+       }
+   }
+};
+    var chart = new Chart(ctx, {
+    // The type of chart we want to create
+    // the type should be bar as to show the data with a bar chart
+    type: 'horizontalBar',
+
+    // The data for our dataset
+    data: {
+        // should pass "safe" so that JS can read it
+        labels: {{countries_names|safe}},
+
+        // the main dataset used for visualizing the bar chart
+        datasets: [{
+            // these next 3 are cosmetics
+            label: 'Number of infected people',
+            backgroundColor: '#689aff',
+            borderColor: '#689aff',
+
+            // real data passed by the values calced before
+            data: {{bar_chart_values|safe}}
+        }]
+    },
+
+    // Configuration options go here
+    options: chartOptions
+});
+</script>
+
+<script>
+    // for getting the data of the map written in the "views.py" file
+    var data_temp = {{data_of_map|safe}};
+
+    // the main data for the map comes from this link with all the names, codes & etc...
+    Highcharts.getJSON('https://cdn.jsdelivr.net/gh/highcharts/highcharts@v7.0.0/samples/data/world-population-density.json', function (data) {
+
+    // Prevent logarithmic errors in color calulcation
+    data.forEach(function (p) {
+        p.value = (p.value < 1 ? 1 : p.value);
+    });
+
+    // Initiate the chart
+    Highcharts.mapChart('mapChart', {
+
+        chart: {
+            map: 'custom/world'
+        },
+
+        title: {
+            text: 'World Map View of Corona'
+        },
+
+        legend: {
+            title: {
+                text: 'Scale',
+                style: {
+                    color: ( // theme
+                        Highcharts.defaultOptions &&
+                        Highcharts.defaultOptions.legend &&
+                        Highcharts.defaultOptions.legend.title &&
+                        Highcharts.defaultOptions.legend.title.style &&
+                        Highcharts.defaultOptions.legend.title.style.color
+                    ) || 'black'
+                }
+            }
+        },
+
+        mapNavigation: {
+            enabled: true,
+            buttonOptions: {
+                verticalAlign: 'bottom'
+            }
+        },
+
+        tooltip: {
+            backgroundColor: 'none',
+            borderWidth: 0,
+            shadow: false,
+            useHTML: true,
+            padding: 0,
+            pointFormat: '<span class="f32"><span class="flag {point.properties.hc-key}">' +
+                '</span></span> {point.name}<br>' +
+                '<span style="font-size:30px; font-family: Montserrat, sans-serif;">{point.value}</span>',
+            positioner: function () {
+                return { x: 0, y: 250 };
+            }
+        },
+
+        colorAxis: {
+            min: 1,
+            max: 1000000,
+            type: 'logarithmic'
+        },
+
+        series: [{
+            data: data_temp,
+            joinBy: ['iso-a3', 'code3'],
+            name: 'infected population',
+            states: {
+                hover: {
+                    color: '#202020'
+                }
+            }
+        }]
+    });
+});
+</script>
+
+<script>
+    var data_temp = {{datasets_for_line|safe}};
+
+    var charOptions2 = {
+        legend: {
+            display: true
+                },
+                scales: {
+                    yAxes: [{
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        id: 'y-axis-1',
+                    }, {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        id: 'y-axis-2',
+
+                        gridLines: {
+                            drawOnChartArea: false,
+                        },
+                    }],
+                },
+    };
+
+    var ctx2 = document.getElementById('lineChart').getContext('2d');
+
+    var myLineChart = new Chart(ctx2, {
+        type: 'line',
+        data: {labels:{{axisvalues|safe}}, datasets: data_temp},
+        options: charOptions2
+    });
+</script>
+</html>
