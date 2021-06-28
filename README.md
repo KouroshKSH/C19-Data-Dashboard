@@ -59,6 +59,3 @@ These are the main ones, but if anything new comes to my mind, I'll update it:
 * [Time Series Talk: Moving Average Model by Ritvikmath on YT](https://youtu.be/voryLhxiPzE)
 * [Learn Pandas by Analyzing Covid-19 by Giles McMullen on YT](https://youtu.be/MYU9W34dZh0) Probably the video which inspired me to tackle this project.
 * [Andrew Ng's Machine Learning Course by Stanford on Coursera](https://www.coursera.org/learn/machine-learning) Don't miss out on this!
-
-
-**And**, almost forgot to say this; I'm Kourosh and this was CS50 (xIran), take care everyone!
