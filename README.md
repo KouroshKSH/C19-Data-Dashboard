@@ -47,7 +47,7 @@ At last, used a method called [Moving/Rolling Average](https://pandas.pydata.org
 If you want to test it out, first you have to clone the project via Github. Then, after getting into the directory of the project, open up the terminal and type in:
 
 ```bash
-git clone "https://github.com/LiLSchw4nz/c19.git"
+git clone "https://github.com/KouroshKSH/C19-Data-Dashboard.git"
 python manage.py runserver
 ```
 
@@ -56,7 +56,7 @@ In case of encountering a problem, hard refresh the page (*Ctrl+Shift+R*) or dis
 You can even scroll down the right panel to view the charts, hover over them as well for extra content and click on the names of the countries to get directed to the detail chart for each and every single one of them (*since they're all buttons linked to their individual graphs and not a plain text*)
 Lastly, you can view the numbers, the reports, the moving mean of the numbers over the last 7 days, hover over the nodes to gain more info, and maybe even conclude some stuff based on your own observations, why not?
 
-Be sure to check the nav-bar as well. By the way, the view might not look as desired/intended at first, since I didn't spend much time making it responsive. I'd recommend changing some widths and heights if needed or even the margins and paddings. I'll provide some photos to illustrate what my screen was showing at the time of writing this. Be sure to look into the screen-shots folder.
+Be sure to check the nav-bar as well. By the way, the view might not look as desired/intended at first, since I didn't spend much time making it responsive. I'd recommend changing some widths and heights if needed or even the margins and paddings.
 
 ---
 
